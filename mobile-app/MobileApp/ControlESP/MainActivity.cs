@@ -10,10 +10,19 @@ using Android.Content;
 using ControlESP.Activities;
 using Android.Net.Wifi;
 using System.Linq;
+using System.Collections.Generic;
+using Android.Support.V4.App;
+using Android;
+using Android.Support.V4.Content;
+using Android.Views;
 
 namespace ControlESP {
-	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+	[Activity(Label = "Home", Theme = "@style/AppTheme", MainLauncher = true)]
 	public class MainActivity : AppCompatActivity {
+		private WifiManager wifiManager;
+		private WifiReceiver wifiReceiver;
+		private const int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
+
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
 			Xamarin.Essentials.Platform.Init(this, savedInstanceState);
@@ -23,64 +32,60 @@ namespace ControlESP {
 			Button connectButton = FindViewById<Button>
 				(Resource.Id.connect_button);
 
-			connectButton.Click += async delegate {
-				await ConnectToESP();
+			wifiManager = GetSystemService(WifiService)
+				.JavaCast<WifiManager>();
+
+			if(!wifiManager.IsWifiEnabled) {
+				wifiManager.SetWifiEnabled(true);
+			}
+
+			connectButton.Click += delegate {
+				ConnectToESP();
 			};
 		}
 
-		private async Task ConnectToESP() {
-			const string ssid = "\"sound_reactive\"";
-			const string password = "\"password\"";
+		private void ConnectToESP() {
+			if (ContextCompat.CheckSelfPermission(
+						this, Manifest.Permission.AccessCoarseLocation)
 
-			WifiConfiguration config = new WifiConfiguration() {
-				Ssid = ssid,
-				PreSharedKey = password
-			};
+					!= Android.Content.PM.Permission.Granted) {
 
-			WifiManager manager = GetSystemService(WifiService)
-				.JavaCast<WifiManager>();
-
-			int addNetwork = manager.AddNetwork(config);
-
-			System.Diagnostics.Debug.WriteLine($"addNetwork: {addNetwork}");
-
-			WifiConfiguration network = manager
-				.ConfiguredNetworks
-				.FirstOrDefault(x => x.Ssid == ssid);
-
-			if (network == null) {
-				System.Diagnostics.Debug.WriteLine("Didn't find the network, not connecting.");
-				return;
-			}
-
-			await Task.Run(() => {
-				manager.Disconnect();
-			});
-
-			bool enableNetwork = manager
-				.EnableNetwork(network.NetworkId, true);
-
-			System.Diagnostics.Debug.WriteLine("enableNetwork = " + enableNetwork);
-
-			if(manager.Reconnect()) {
-				var builder = new Android.App.AlertDialog.Builder(this);
-
-				builder.SetMessage("Connected");
-				Android.App.AlertDialog alert = builder.Create();
-				alert.Show();
+				ActivityCompat.RequestPermissions(
+					this,
+					new string[] { Manifest.Permission.AccessCoarseLocation },
+					MY_PERMISSIONS_ACCESS_COARSE_LOCATION);
 			}
 			else {
-				var builder = new Android.App.AlertDialog.Builder(this);
+				wifiReceiver = new WifiReceiver(wifiManager);
+				IntentFilter filter = new IntentFilter();
+				filter.AddAction(WifiManager.ScanResultsAvailableAction);
+				RegisterReceiver(wifiReceiver, filter);
 
-				builder.SetMessage("Nope");
-				Android.App.AlertDialog alert = builder.Create();
-				alert.Show();
+				GetWifi();
+
+				//UnregisterReceiver(wifiReceiver);
 			}
+		}
 
-			Intent mainPage = new Intent(this,
-				typeof(MainControlActivity));
+		private void GetWifi() {
+			if(Build.VERSION.SdkInt >= BuildVersionCodes.M) {
+				if(ContextCompat.CheckSelfPermission(this,
+					Manifest.Permission.AccessCoarseLocation)
+					!= Android.Content.PM.Permission.Granted) {
 
-			StartActivity(mainPage);
+					ActivityCompat.RequestPermissions(this,
+						new string[] {
+							Manifest.Permission.AccessCoarseLocation
+						},
+						MY_PERMISSIONS_ACCESS_COARSE_LOCATION);
+				}
+				else {
+					wifiManager.StartScan();
+				}
+			}
+			else {
+				wifiManager.StartScan();
+			}
 		}
 
 		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults) {
