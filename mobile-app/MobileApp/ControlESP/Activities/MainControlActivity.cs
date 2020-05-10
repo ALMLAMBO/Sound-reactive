@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 
 using Android.App;
@@ -15,7 +14,7 @@ using Android.Widget;
 using Xamarin.Essentials;
 
 namespace ControlESP.Activities {
-	[Activity(Label = "MainControlActivity", Theme = "@style/AppTheme")]
+	[Activity(Label = "Main Control", Theme = "@style/AppTheme")]
 	public class MainControlActivity : AppCompatActivity {
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
@@ -29,17 +28,7 @@ namespace ControlESP.Activities {
 		}
 
 		private void SendLedOn_Click(object sender, EventArgs e) {
-			try {
-				new Android.App.AlertDialog.Builder(this)
-					.SetMessage("Sended command")
-					.Show();
-
-				return;
-			} 
-			catch (Exception) {
-
-				throw;
-			}
+			
 		}
 	}
 }
