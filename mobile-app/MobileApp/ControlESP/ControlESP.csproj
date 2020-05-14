@@ -68,6 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activities\MainControlActivity.cs" />
+    <Compile Include="ColorPickerListener.cs" />
+    <Compile Include="LedControl.cs" />
+    <Compile Include="LedStripArrayAdapter.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -118,6 +121,11 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\main_control_activity.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\led_strip_row.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

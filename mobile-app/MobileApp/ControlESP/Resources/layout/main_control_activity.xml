@@ -7,20 +7,16 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
-	<TextView
-		android:text="Test intent"
-		android:textAppearance="?android:attr/textAppearanceLarge"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:minWidth="25px"
-		android:minHeight="25px"
-		android:id="@+id/test_intent_text_view" />
-
 	<Button
 		android:text="Send command"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_toLeftOf="@id/test_intent_text_view"
-		android:id="@+id/led_on_button" />
+		android:id="@+id/send_command_button" />
 
+	<ListView
+		android:minWidth="25px"
+		android:minHeight="25px"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:id="@+id/available_led_strips" />
 </LinearLayout>
