@@ -30,12 +30,6 @@ namespace ControlESP {
 				List<ScanResult> wifiList = wifiManager
 					.ScanResults.ToList();
 
-				List<string> deviceList = new List<string>();
-
-				wifiList.ForEach(x => {
-					deviceList.Add(x.Ssid + " - " + x.Capabilities);
-				});
-
 				WifiConfiguration network = wifiList
 					.Where(x => x.Ssid.Equals("sound_reactive"))
 					.Select(x => new WifiConfiguration() { Ssid = "sound_reactive" })
@@ -43,23 +37,22 @@ namespace ControlESP {
 
 				if(network != null) {
 					network.PreSharedKey = password;
-					ConnectivityManager manager = context
-						.GetSystemService(Context.ConnectivityService)
-						.JavaCast<ConnectivityManager>();
+					network.Ssid = ssid;
+					wifiList.ForEach(x => {
+						if(x.Ssid != "sound_reactive") {
+							WifiConfiguration wifi =
+								new WifiConfiguration() {
+									Ssid = x.Ssid
+								};
 
-					NetworkInfo info = manager
-						.GetNetworkInfo(ConnectivityType.Wifi);
-					
-					if(!info.IsConnected) {
-						AlertDialog.Builder builder =
-							new AlertDialog.Builder(context);
+							wifiManager.DisableNetwork(wifi.NetworkId);
+						}
+					});
 
-						builder.SetMessage("Not connected");
-						AlertDialog dialog = builder.Create();
-						dialog.Show();
-					} 
-					else {
-						Intent redirectToMainControl = 
+					wifiManager.EnableNetwork(network.NetworkId, true);
+
+					if(wifiManager.Reconnect()) {
+						Intent redirectToMainControl =
 							new Intent(context, typeof(MainControlActivity));
 
 						context.StartActivity(redirectToMainControl);
@@ -74,6 +67,8 @@ namespace ControlESP {
 					alert.Show();
 				}
 			}
+
+			context.UnregisterReceiver(this);
 		}
 	}
 }
