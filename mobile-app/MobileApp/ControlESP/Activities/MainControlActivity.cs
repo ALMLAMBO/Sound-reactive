@@ -22,9 +22,14 @@ namespace ControlESP.Activities {
 			SetContentView(Resource.Layout.main_control_activity);
 
 			Button button = FindViewById<Button>(
-				Resource.Id.led_on_button);
+				Resource.Id.send_command_button);
 
 			button.Click += SendLedOn_Click;
+			ListView availableLedStripsListView =
+				FindViewById<ListView>(Resource.Id.available_led_strips);
+
+			LedStripArrayAdapter adapter = 
+				new LedStripArrayAdapter(this, new List<LedControl>());
 		}
 
 		private void SendLedOn_Click(object sender, EventArgs e) {
